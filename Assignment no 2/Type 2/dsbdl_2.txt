@@ -1,0 +1,80 @@
+package WordCount_div;
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount_div {
+
+    public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
+        private final static IntWritable one = new IntWritable(1);
+        private Text ip = new Text();
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] tokens = line.split(" ");
+            if (tokens.length > 0) {
+                String ipAddress = tokens[0];
+                ip.set(ipAddress);
+                context.write(ip, one);
+            }
+        }
+    }
+
+    public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        private IntWritable result = new IntWritable();
+        // max count tracking
+        private Text maxIP = new Text();
+        private int maxCount = 0;
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }// Track the IP with maximum frequency
+            if (sum > maxCount) {
+                maxCount = sum;
+                maxIP.set(key);
+            }
+            result.set(sum);
+            context.write(key, result);
+        }
+        protected void cleanup(Context context) throws IOException, InterruptedException {
+            context.write(new Text("MaxWord: " + maxIP), new IntWritable(maxCount));
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "word count");
+        job.setJarByClass(WordCount_div.class);
+        job.setMapperClass(TokenizerMapper.class);
+        job.setCombinerClass(IntSumReducer.class);
+        job.setReducerClass(IntSumReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+
+
+
+
+
+
+
+Queries to run the code
+pwd
+ls
+Hadoop fs -put Desktop/Input.txt Imput1.txt
+Hadoop jar WordCount_div.jar WordCount_div.WordCount_div Input1.txt dir68
+Hadoop fs -cat dir68/part-r-00000

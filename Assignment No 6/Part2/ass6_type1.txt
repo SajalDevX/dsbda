@@ -1,0 +1,94 @@
+hive> CREATE TABLE students
+    > (
+    > name STRING,
+    > cource STRING, 
+    > cgpa FLOAT,
+    > attendance INT,
+    > grade STRING,
+    > resutl STRING,
+    > scaled_cgpa FLOAT)
+    > ROW FORMAT DELIMITED 
+    > FIELDS TERMINATED BY ','
+    > STORED AS TEXTFILE;
+
+ LOAD DATA LOCAL INPATH '/home/cloudera/Desktop/windows_file/Student.csv'
+    > INTO TABLE students;
+Loading data to table mining_db.students
+Table mining_db.students stats: [numFiles=1, totalSize=401]
+OK
+Time taken: 0.271 seconds
+
+hive> SELECT cource, AVG(cgpa) AS avg_cgpa
+    > FROM students
+    > GROUP BY cource;
+Query ID = cloudera_20260406021616_bc8ce943-411d-4c50-8a00-5b7f8a14e02e
+Total jobs = 1
+Launching Job 1 out of 1
+
+cource	NULL
+cse	8.170833349227905
+cse(aiml)	8.791666507720947
+ece	8.400000095367432
+Time taken: 16.92 seconds, Fetched: 4 row(s)
+hive> SELECT name, cource, cgpa
+    > FROM students
+    > WHERE cgpa > 8;
+OK
+yash	cse(aiml)	8.383333
+vikram	cse	8.383333
+veer	ece	9.0
+hasini	cse	9.3
+devi	cse(aiml)	9.2
+shiva	cse	8.5
+Time taken: 0.105 seconds, Fetched: 6 row(s)
+hive> SELECT name, attendance, cgpa
+    > FROM students
+    > WHERE attendance < 75;
+OK
+vikram	69	8.383333
+shiva	67	8.5
+Time taken: 0.056 seconds, Fetched: 2 row(s)
+hive> SELECT resutl, COUNT(*) AS total
+    > FROM students
+    > GROUP BY resutl;
+Query ID = cloudera_20260406021919_b275b745-b252-448d-894d-1923b94578e5
+Total jobs = 1
+Launching Job 1 out of 1
+Total MapReduce CPU Time Spent: 1 seconds 310 msec
+OK
+Excellent	1
+Good	1
+Not satisfied	3
+results	1
+very Good	3
+Time taken: 13.935 seconds, Fetched: 5 row(s)
+hive> SELECT grade, AVG(cgpa) AS avg_cgpa
+    > FROM students
+    > GROUP BY grade;
+Query ID = cloudera_20260406022121_2e1ec046-7993-479c-9876-25dc78d2225c
+Total jobs = 1
+Launching Job 1 out of 1
+OK
+A	9.300000190734863
+B	8.252380916050502
+Grade	NULL
+Time taken: 14.811 seconds, Fetched: 3 row(s)
+hive> SELECT name, cource, cgpa,
+    > RANK() OVER(PARTITION BY cource ORDER BY cgpa DESC) AS rank
+    > FROM students;
+Query ID = cloudera_20260406022323_aec613eb-ab05-4d07-8186-ba97b7b9fa70
+Total jobs = 1
+Launching Job 1 out of 1
+OK
+name	cource	NULL	1
+hasini	cse	9.3	1
+shiva	cse	8.5	2
+vikram	cse	8.383333	3
+harsh	cse	6.5	4
+devi	cse(aiml)	9.2	1
+yash	cse(aiml)	8.383333	2
+veer	ece	9.0	1
+muzammil	ece	7.8	2
+Time taken: 14.246 seconds, Fetched: 9 row(s)
+hive> 
+

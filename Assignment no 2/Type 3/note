@@ -1,0 +1,25 @@
+  Project Structure
+mrLogFile_demo/
+ ├── UserLogMapper.java
+ ├── UserLogReducer.java
+ └── UserLogDriver.java
+ 
+ How To Run
+From Terminal
+hadoop jar YourJarName.jar mrLogFile_demo.UserLogDriver /input/log.txt /output/maxip
+
+From Eclipse
+
+Run → Run Configurations
+
+Java Application → Arguments
+
+Program Arguments:
+
+/input/log.txt /output/maxip
+
+  Output on Console
+=================================
+MAX FREQUENCY IP: 192.168.1.5
+COUNT: 245
+=================================
